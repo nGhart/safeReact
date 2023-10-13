@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      /* Import Google font - Poppins */
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        position: relative;
+        background: rgb(160, 210, 232);
+        background-image: url(./assets/images/gameBackground.png);
+        filter: saturate(8);
+      }
+      .game {
+        height: 100%;
+        width: 100%;
+      }
+      .game,
+      #gameover {
+        position: absolute;
+      }
+      .wall {
+        height: 60%;
+        display: flex;
+        margin-left: 60px;
+        align-items: center;
+      }
+      .lastGuess {
+        width: 20%;
+        height: 400px;
+        margin-right: 80px;
+        background-color: rgba(227, 232, 241, 0.8);
+        border-radius: 20px;
+        border: 2px solid #451875;
+        padding: 5px;
+      }
+      .lastGuess h3 {
+        color: #494d5f;
+        text-align: center;
+        margin: auto;
+        font-size: 50px;
+      }
+      .safe {
+        position: relative;
+        min-width: 600px;
+        width: 35%;
+        min-height: 355px;
+        height: 75%;
+        margin: 10px;
+        box-shadow: inset 2px 2px 20px rgba(0, 0, 0, 0.4),
+          4px 4px 10px rgba(0, 0, 0, 0.7);
+      }
+      .safeContent {
+        position: relative;
+      }
+      .safeContent img {
+        position: absolute;
+      }
+      .inside {
+        border: 60px inset grey;
+        background-color: grey;
+      }
+      .front,
+      .inside {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.4),
+          4px 4px 10px rgba(0, 0, 0, 0.7);
+      }
+      .front {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 20px inset;
+        transform-origin: right;
+        transition: all 0.5s ease-in-out;
+        background-color: #28333b;
+      }
+      #hide {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+      }
+      .handle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background-color: #28333b;
+        margin-right: 100px;
+        margin-left: 70px;
+        border: 5px inset;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #dial {
+        cursor: pointer;
+      }
+      .container {
+        background-color: rgb(54, 69, 79);
+        border-radius: 5%;
+        border: 5px inset;
+        padding: 5px;
+        box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.4),
+          4px 4px 10px rgba(0, 0, 0, 0.7);
+      }
+      .indicators {
+        width: 30%;
+        display: flex;
+        justify-content: space-between;
+        margin: 2px auto 3px;
+      }
+      #red {
+        width: 20px;
+        height: 10px;
+        background-color: rgb(48, 18, 18);
+        border-radius: 5px;
+      }
+      #green {
+        width: 20px;
+        height: 10px;
+        background-color: rgb(41, 65, 41);
+        border-radius: 5px;
+      }
+      input {
+        height: 45px;
+        width: 30px;
+        border-radius: 6px;
+        outline: none;
+        font-size: 1.125rem;
+        text-align: center;
+        border: 1px solid #ddd;
+        background-color: rgb(120, 206, 35);
+        background-color: #add021;
+        border: 2px inset;
+        margin: 0 3px 0 3px;
+        margin-left: 5px;
+        font-weight: 700;
+      }
+      .keypad {
+        margin: 5px auto 5px auto;
+      }
+      #numbers {
+        font-size: 1.5em;
+        font-weight: 600;
+        width: 35px;
+        height: 35px;
+        background-color: rgb(99, 112, 121);
+        margin: 2px auto 0 auto;
+        border-radius: 50%;
+        border: none;
+        box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.3),
+          1px 1px 5px rgba(54, 69, 79, 0.7);
+        cursor: pointer;
+      }
+      #numbers:hover {
+        background-color: #000;
+        color: silver;
+      }
+      .go {
+        background-color: green;
+        font-size: 18px;
+        padding: 0;
+      }
+      #timer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 40px;
+        padding: 20px;
+        font-weight: 700;
+        margin-left: 40px;
+        border-radius: 50%;
+        height: 100px;
+        width: 100px;
+        border: 5px solid #451875;
+        background-color: #aaafdd;
+      }
+      #previousGuess {
+        font-size: 30px;
+        font-weight: 700;
+        margin: 20px;
+        width: 40%;
+        margin-left: 30%;
+        margin-right: auto;
+        text-align: center;
+        background-color: rgba(170, 174, 181, 0.8);
+      }
+      #oldGuesses {
+        font-size: 20px;
+        width: 100%;
+      }
+      .controls {
+        display: flex;
+        justify-content: center;
+      }
+      .controls button,
+      #startModal button,
+      .gameoverText button {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        background-color: #451875;
+        color: yellow;
+        font-weight: 700;
+        font-size: 18px;
+        margin: 30px 5px 0 5px;
+        border: 2px inset #451875;
+        cursor: pointer;
+      }
+      .controls button {
+        background-color: #aaafdd;
+      }
+      #muteSound:hover + .muteKeypadHover {
+        display: block;
+        color: white;
+      }
+      #muteMusic:hover + .muteMusicHover {
+        display: inline;
+        color: white;
+      }
+      #gameover {
+        background-color: rgb(3, 0, 14);
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        visibility: hidden;
+        filter: saturate(4);
+      }
+      .gameoverModal {
+        background-color: rgba(0, 0, 0, 0.1);
+        width: 40%;
+        height: 60%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        background-color: rgba(72, 156, 224, 0.9);
+        box-shadow: inset 2px 2px 5px rgba(225, 225, 226, 0.4),
+          4px 4px 10px rgba(123, 26, 26, 0.7);
+        border-radius: 5px;
+      }
+      .gameoverModal,
+      .cuffImage {
+        position: absolute;
+      }
+      .gameoverText {
+        z-index: 1;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+      .gameoverText h1 {
+        color: white;
+        font-size: 80px;
+      }
+      .gameoverText h2 {
+        color: white;
+      }
+      .gameoverText button {
+        width: 80px;
+        text-align: center;
+      }
+      #start {
+        background-color: rgba(0, 0, 0, 0.9);
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+      }
+      #startModal {
+        background: url(./assets/images/Thief.png);
+        background-size: cover;
+        filter: drop-shadow(8px 8px 10px gray);
+        border-radius: 10px;
+        box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.4),
+          4px 4px 10px rgba(0, 0, 0, 0.7);
+        width: 70%;
+        height: 70%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+      }
+      .modalContent {
+        background-color: rgba(227, 232, 241, 0.8);
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+      }
+      .title {
+        text-align: center;
+        font-size: 50px;
+        color: #451875;
+      }
+      hr {
+        background-color: yellow;
+        height: 5px;
+        width: 50%;
+      }
+      .openSafe {
+        transform: perspective(1200px) rotateY(105deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div class="game">
+      <div>
+        <audio src="./assets/sounds/key-press.wav" id="keySound"></audio>
+        <audio
+          id="siren"
+          src="./assets/sounds/Police Siren.wav.crdownload"
+        ></audio>
+        <audio
+          id="doorSound"
+          src="./assets/sounds/Door-Open-A2-www.fesliyanstudios.com.mp3"
+        ></audio>
+      </div>
+      <div class="wall">
+        <div class="lastGuess">
+          <!--shows most recent guess-->
+          <h3 id="lastGuess">Hint</h3>
+          <!--shows whether digit is equal, higher or lower than corresponding digit in random-->
+          <h4 id="firstDigit"></h4>
+          <h4 id="secondDigit"></h4>
+          <h4 id="thirdDigit"></h4>
+        </div>
+        <div class="safe">
+          <!--inside view of safe-->
+          <div class="inside" id="inside">
+            <div class="safeContent">
+              <img src="./assets/images/diamond.png" alt="" width="250px" />
+              <img src="./assets/images/cash.png" alt="" width="250px" />
+              <img src="./assets/images/R.png" alt="" width="350px" />
+              <img src="./assets/images/moreCash.png" alt="" width="500px" />
+            </div>
+          </div>
+          <!--front view of safe-->
+          <div class="front" id="open">
+            <!--hide back of safe door-->
+            <div id="hide">
+              <div class="handle">
+                <img
+                  src="./assets/images/dial.png"
+                  alt=""
+                  width="100px"
+                  id="dial"
+                  onclick="turnDial()"
+                />
+              </div>
+              <div class="container">
+                <!-- lights that change depending on guess-->
+                <div class="indicators">
+                  <div id="red"></div>
+                  <div id="green"></div>
+                </div>
+                <!--indicators close-->
+                <div class="output">
+                  <input type="text" id="input1" maxlength="1" />
+                  <input type="text" id="input2" maxlength="1" />
+                  <input type="text" id="input3" maxlength="1" />
+                </div>
+                <!--output close-->
+                <div class="keypad">
+                  <button id="numbers" onclick="addKey('1')">1</button>
+                  <button id="numbers" onclick="addKey('2')">2</button>
+                  <button id="numbers" onclick="addKey('3')">3</button>
+                  <br />
+                  <button id="numbers" onclick="addKey('4')">4</button>
+                  <button id="numbers" onclick="addKey('5')">5</button>
+                  <button id="numbers" onclick="addKey('6')">6</button>
+                  <br />
+                  <button id="numbers" onclick="addKey('7')">7</button>
+                  <button id="numbers" onclick="addKey('8')">8</button>
+                  <button id="numbers" onclick="addKey('9')">9</button>
+                  <br />
+                  <button id="numbers" onclick="clearInput()">C</button>
+                  <button id="numbers" onclick="addKey('0')">0</button>
+                  <button class="go" id="numbers" onclick="checkRandom()">
+                    go
+                  </button>
+                </div>
+                <!--keypad close-->
+              </div>
+              <!--container close-->
+            </div>
+            <!--hide closer-->
+          </div>
+          <!--front close-->
+        </div>
+        <!--safe close-->
+        <div id="timer">60s</div>
+      </div>
+      <!--wall close-->
+      <!--Will show previous guesses-->
+      <p id="previousGuess">
+        Previous guesses
+        <i id="oldGuesses"></i>
+      </p>
+      <div class="controls">
+        <button id="muteSound" onclick="muteKeypad()">📣</button>
+        <button id="muteMusic" onclick="pauseMusic()">♫</button>
+        <button id="restart">Reset</button>
+      </div>
+    </div>
+    <!--modal that pops up when game is over-->
+    <div id="gameover">
+      <div class="gameoverModal">
+        <div class="gameoverText">
+          <h1>GAME OVER!!</h1>
+          <h2 id="answer"></h2>
+          <button onclick="reset()">Restart</button>
+        </div>
+        <div class="cuffImage">
+          <img id="cuff" src="./assets/images/hcuff.png" alt="" />
+        </div>
+      </div>
+    </div>
+
+    <!--modal that shows up at start of game-->
+    <div id="start">
+      <div id="startModal">
+        <div class="modalContent">
+          <h1 class="title">CRACK THE SAFE</h1>
+          <hr />
+          <p>Guess the code before time runs out</p>
+          <p>Crack the safe</p>
+          <p>Win the cash</p>
+          <button onclick="gametimer(), hideStartModal()">Start</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      let open = document.getElementById('open');
+      var keySound = document.getElementById('keySound');
+      var siren = document.getElementById('siren');
+      let restart = document.getElementById('restart');
+      var timer = document.getElementById('timer');
+      let gameoverPopup = document.getElementById('gameover');
+      let timeCounter;
+      let redLight = document.getElementById('red');
+      let greenLight = document.getElementById('green');
+      let reveal = document.getElementById('answer');
+      let doorSound = document.getElementById('doorSound');
+      let muteSound = document.getElementById('muteSound');
+      let start = document.getElementById('start');
+      let muteMusic = document.getElementById('muteMusic');
+
+      //timer
+      function gametimer() {
+        let time = 60;
+        timeCounter = setInterval(function () {
+          timer.innerText = time + 's';
+          time--;
+          if (time == 15 && time >= 0) {
+            playMusic();
+          } else if (time == 0) {
+            clearInterval(timeCounter);
+            timer.innerText = 'game over';
+            pauseMusic();
+            gameoverPopup.style.visibility = 'visible';
+            reveal.innerHTML = 'The code was: ' + arr;
+          }
+        }, 1000);
+      }
+
+      //play music
+      function playMusic() {
+        siren.play();
+      }
+
+      //pause music
+      function pauseMusic() {
+        siren.pause();
+      }
+      //play sound when a number key is pressed
+      function playAudio() {
+        keySound.play();
+      }
+
+      // mute keypad sound
+      function muteKeypad() {
+        keySound.volume = 0.0;
+      }
+      //changes
+      //play sound when safe opens
+      function playSafe() {
+        doorSound.play();
+      }
+
+      //get user input from keypad
+      let inputOne = document.getElementById('input1').innerText;
+      let inputTwo = document.getElementById('input2');
+      let inputThree = document.getElementById('input3');
+      let currentInput = 1;
+      const inputs = [
+        document.getElementById('input1'),
+        document.getElementById('input2'),
+        document.getElementById('input3'),
+      ];
+
+      let userInput = '';
+
+      function addKey(key) {
+        if (key == '#') {
+          console.log(userInput);
+          userInput = '';
+          for (let i = 0; i < 3; i++) {
+            inputs[i].value = '';
+          }
+          currentInput = 1;
+        } else {
+          if (currentInput <= 3) {
+            userInput += key;
+            inputs[currentInput - 1].value = key;
+            currentInput++;
+            setTimeout(playAudio, 10);
+          }
+        }
+      }
+
+      function clearInput() {
+        if (currentInput > 1) {
+          currentInput--;
+          userInput = userInput.slice(0, -1);
+          inputs[currentInput - 1].value = '';
+          setTimeout(playAudio, 10);
+        }
+      }
+      //random array
+      let arr = [];
+
+      for (let i = 0; i < 3; i++) {
+        const randomDigit = Math.floor(Math.random() * 10000)
+          .toString()
+          .padStart(3, '0')
+          .slice(-1);
+        arr.push(Number(randomDigit));
+        console.log([arr]);
+      }
+
+      //check if number guessed matches
+      function checkRandom() {
+        console.log(userInput);
+        let numb = userInput;
+        const newArr = Array.from(String(userInput), Number);
+        lastGuess.innerHTML = numb;
+        playAudio();
+        let hint = document.getElementsByTagName('h4');
+
+        for (let i = 0; i < 3; i++) {
+          if (newArr[i] === arr[i]) {
+            console.log(`Element ${i} is ok`);
+            hint[i].innerHTML = `Element (${i}) is correct`;
+            redLight.style.backgroundColor = 'rgb(48, 18, 18);';
+            greenLight.style.backgroundColor = '#22f032';
+          } else if (newArr[i] > arr[i]) {
+            console.log(`Element ${i} H`);
+            hint[i].innerHTML = `Element (${i}) is high`;
+            redLight.style.backgroundColor = '#f72119';
+            greenLight.style.backgroundColor = 'rgb(41, 65, 41)';
+          } else if (newArr[i] < arr[i]) {
+            console.log(`Element ${i} L`);
+            hint[i].innerHTML = `Element (${i}) is low`;
+            redLight.style.backgroundColor = '#f72119';
+            greenLight.style.backgroundColor = 'rgb(41, 65, 41)';
+          }
+        }
+
+        showMessage();
+
+        if (newArr[0] == arr[0] && newArr[1] == arr[1] && newArr[2] == arr[2]) {
+          redLight.style.backgroundColor = 'rgb(48, 18, 18);';
+          greenLight.style.backgroundColor = '#22f032';
+          clearInterval(timeCounter);
+          pauseMusic();
+          setTimeout(playSafe, 100);
+          timer.innerText = 'win';
+          setTimeout(openSafe, 2000);
+        } else {
+          console.log('try again');
+        }
+      }
+
+      //open safe
+      function openSafe() {
+        openSafeDoor();
+        setTimeout(hideBackOfSafe, 200);
+      }
+      //this opens safe door
+      function openSafeDoor() {
+        open.classList.toggle('openSafe');
+      }
+      //this hides back of safe be plain
+      let hide = document.getElementById('hide');
+      function hideBackOfSafe() {
+        hide.style.visibility = 'hidden';
+      }
+
+      //restart game during play
+      restart.addEventListener('click', function (e) {
+        //e.preventDefault();
+        location.reload();
+      });
+
+      //restart game after game over
+      function reset() {
+        gameoverPopup.style.visibility = 'hidden';
+        location.reload();
+      }
+      //display all previous guesses
+      var prevGuess = [];
+      var oldGuesses = document.getElementById('oldGuesses');
+      function showMessage() {
+        prevGuess.push(lastGuess.innerHTML);
+        oldGuesses.innerHTML = prevGuess.join(', ');
+      }
+
+      //hide start modal
+      function hideStartModal() {
+        start.style.visibility = 'hidden';
+      }
+    </script>
+  </body>
+</html>
